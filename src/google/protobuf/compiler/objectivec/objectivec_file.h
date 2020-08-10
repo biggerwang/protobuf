@@ -65,14 +65,14 @@ class FileGenerator {
   string root_class_name_;
   bool is_bundled_proto_;
 
-  std::vector<EnumGenerator*> enum_generators_;
-  std::vector<MessageGenerator*> message_generators_;
-  std::vector<ExtensionGenerator*> extension_generators_;
+  std::vector<std::unique_ptr<EnumGenerator>> enum_generators_;
+  std::vector<std::unique_ptr<MessageGenerator>> message_generators_;
+  std::vector<std::unique_ptr<ExtensionGenerator>> extension_generators_;
 
   const Options options_;
 
   void PrintFileRuntimePreamble(
-      io::Printer* printer, const std::set<string>& headers_to_import) const;
+      io::Printer* printer, const std::vector<string>& headers_to_import) const;
 };
 
 }  // namespace objectivec

@@ -160,6 +160,10 @@ class Timestamp(object):
     else:
       second_value = time_value[:point_position]
       nano_value = time_value[point_position + 1:]
+    if 't' in second_value:
+      raise ValueError(
+          'time data \'{0}\' does not match format \'%Y-%m-%dT%H:%M:%S\', '
+          'lowercase \'t\' is not accepted'.format(second_value))
     date_object = datetime.strptime(second_value, _TIMESTAMPFOMAT)
     td = date_object - datetime(1970, 1, 1)
     seconds = td.seconds + td.days * _SECONDS_PER_DAY
@@ -722,10 +726,10 @@ def _SetStructValue(struct_value, value):
     struct_value.string_value = value
   elif isinstance(value, _INT_OR_FLOAT):
     struct_value.number_value = value
-  elif isinstance(value, dict):
+  elif isinstance(value, (dict, Struct)):
     struct_value.struct_value.Clear()
     struct_value.struct_value.update(value)
-  elif isinstance(value, list):
+  elif isinstance(value, (list, ListValue)):
     struct_value.list_value.Clear()
     struct_value.list_value.extend(value)
   else:

@@ -142,22 +142,25 @@ class PROTOC_EXPORT Generator : public CodeGenerator {
   Generator() {}
   virtual ~Generator() {}
 
-  virtual bool Generate(const FileDescriptor* file,
-                        const std::string& parameter, GeneratorContext* context,
-                        std::string* error) const {
+  bool Generate(const FileDescriptor* file, const std::string& parameter,
+                GeneratorContext* context, std::string* error) const override {
     *error = "Unimplemented Generate() method. Call GenerateAll() instead.";
     return false;
   }
 
-  virtual bool HasGenerateAll() const { return true; }
+  bool HasGenerateAll() const override { return true; }
 
-  virtual bool GenerateAll(const std::vector<const FileDescriptor*>& files,
-                           const std::string& parameter,
-                           GeneratorContext* context, std::string* error) const;
+  bool GenerateAll(const std::vector<const FileDescriptor*>& files,
+                   const std::string& parameter, GeneratorContext* context,
+                   std::string* error) const override;
+
+  uint64 GetSupportedFeatures() const override {
+    return FEATURE_PROTO3_OPTIONAL;
+  }
 
  private:
   void GenerateHeader(const GeneratorOptions& options,
-                      io::Printer* printer) const;
+                      const FileDescriptor* file, io::Printer* printer) const;
 
   // Generate goog.provides() calls.
   void FindProvides(const GeneratorOptions& options, io::Printer* printer,

@@ -29,12 +29,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
+#include <string>
 #include <google/protobuf/compiler/objectivec/objectivec_generator.h>
 #include <google/protobuf/compiler/objectivec/objectivec_file.h>
 #include <google/protobuf/compiler/objectivec/objectivec_helpers.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
-#include <google/protobuf/stubs/strutil.h>
 
 namespace google {
 namespace protobuf {
@@ -93,8 +93,11 @@ bool ObjectiveCGenerator::GenerateAll(const std::vector<const FileDescriptor*>& 
       // A semicolon delimited string that lists the paths of .proto files to
       // exclude from the package prefix validations (expected_prefixes_path).
       // This is provided as an "out", to skip some files being checked.
-      SplitStringUsing(options[i].second, ";",
-                       &generation_options.expected_prefixes_suppressions);
+      for (StringPiece split_piece : Split(
+               options[i].second, ";", true)) {
+        generation_options.expected_prefixes_suppressions.push_back(
+            std::string(split_piece));
+      }
     } else if (options[i].first == "generate_for_named_framework") {
       // The name of the framework that protos are being generated for. This
       // will cause the #import statements to be framework based using this
@@ -127,6 +130,13 @@ bool ObjectiveCGenerator::GenerateAll(const std::vector<const FileDescriptor*>& 
       // with generate_for_named_framework, or the relative path to it's include
       // path otherwise.
       generation_options.named_framework_to_proto_path_mappings_path = options[i].second;
+    } else if (options[i].first == "runtime_import_prefix") {
+      // Path to use as a prefix on #imports of runtime provided headers in the
+      // generated files. When integrating ObjC protos into a build system,
+      // this can be used to avoid having to add the runtime directory to the
+      // header search path since the generate #import will be more complete.
+      generation_options.runtime_import_prefix =
+          StripSuffixString(options[i].second, "/");
     } else {
       *error = "error: Unknown generator option: " + options[i].first;
       return false;
